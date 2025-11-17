@@ -43,6 +43,35 @@ class IncidentController
 
     // edit/update/delete similar to StudentController omitted for brevity
 
+    // new: edit like StudentController
+    public function edit()
+    {
+        $id = (int)($_GET['id'] ?? 0);
+        $incident = $this->model->find($id);
+        $students = $this->studentModel->all();
+        ob_start();
+        include __DIR__ . '/../../templates/incident/form.php';
+        $content = ob_get_clean();
+        include __DIR__ . '/../../templates/layout.php';
+    }
+
+    public function update()
+    {
+        $id = (int)($_POST['IncidentID'] ?? 0);
+        $data = $_POST;
+        $this->model->update($id, $data);
+        header('Location: ' . BASE_URL . '/?controller=incident&action=index');
+        exit;
+    }
+
+    public function delete()
+    {
+        $id = (int)($_GET['id'] ?? 0);
+        $this->model->delete($id);
+        header('Location: ' . BASE_URL . '/?controller=incident&action=index');
+        exit;
+    }
+
     // new: export incidents as PDF
     public function exportPdf()
     {
