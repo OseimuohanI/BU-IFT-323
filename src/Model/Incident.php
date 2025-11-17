@@ -55,6 +55,16 @@ class Incident
         ]);
     }
 
+    public function updateStatus(int $id, string $status): bool
+    {
+        $allowed = ['Open','Under Review','Actioned','Closed'];
+        if (!in_array($status, $allowed, true)) {
+            return false;
+        }
+        $stmt = $this->db->prepare("UPDATE IncidentReport SET Status = :status WHERE IncidentID = :id");
+        return $stmt->execute([':status' => $status, ':id' => $id]);
+    }
+
     public function delete(int $id): bool
     {
         $stmt = $this->db->prepare("DELETE FROM IncidentReport WHERE IncidentID = :id");

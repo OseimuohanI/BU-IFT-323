@@ -42,4 +42,46 @@ class IncidentController
     }
 
     // edit/update/delete similar to StudentController omitted for brevity
+
+    // new: export incidents as PDF
+    public function exportPdf()
+    {
+        $incidents = $this->model->all();
+        // render HTML for PDF
+        ob_start();
+        include __DIR__ . '/../../templates/incident/pdf.php';
+        $html = ob_get_clean();
+
+        // use Dompdf (composer package)
+        $dompdf = new \Dompdf\Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // stream as download
+        $filename = 'incidents_' . date('Ymd_His') . '.pdf';
+        $dompdf->stream($filename, ['Attachment' => 1]);
+        exit;
+    }
+
+    // new: change status (expects POST)
+    public function changeStatus()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/?controller=incident&action=index');
+            exit;
+        }
+
+        $id = (int)($_POST['IncidentID'] ?? 0);
+        $status = trim($_POST['Status'] ?? '');
+
+        if ($id <= 0 || $status === '') {
+            header('Location: ' . BASE_URL . '/?controller=incident&action=index');
+            exit;
+        }
+
+        $this->model->updateStatus($id, $status);
+        header('Location: ' . BASE_URL . '/?controller=incident&action=index');
+        exit;
+    }
 }
