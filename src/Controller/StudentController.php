@@ -64,22 +64,18 @@ class StudentController
         exit;
     }
 
-    // new: export students as PDF
     public function exportPdf()
     {
         $students = $this->model->all();
-        // render HTML for PDF
         ob_start();
         include __DIR__ . '/../../templates/student/pdf.php';
         $html = ob_get_clean();
 
-        // use Dompdf (composer package)
         $dompdf = new \Dompdf\Dompdf();
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        // stream as download
         $filename = 'students_' . date('Ymd_His') . '.pdf';
         $dompdf->stream($filename, ['Attachment' => 1]);
         exit;

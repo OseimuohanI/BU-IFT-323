@@ -15,7 +15,6 @@
     let theme = null;
     try { theme = localStorage.getItem(storageKey); } catch(e){}
     if (!theme) {
-      // prefer system if no choice
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) theme = 'dark';
       else theme = 'light';
     }

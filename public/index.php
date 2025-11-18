@@ -3,7 +3,6 @@ require __DIR__ . '/../src/bootstrap.php';
 
 use Service\Auth;
 
-// Redirect unauthenticated users to the login page (except when already requesting login)
 $requestedController = strtolower($_GET['controller'] ?? 'student');
 $requestedAction = strtolower($_GET['action'] ?? 'index');
 
