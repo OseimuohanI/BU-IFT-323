@@ -41,9 +41,6 @@ class IncidentController
         exit;
     }
 
-    // edit/update/delete similar to StudentController omitted for brevity
-
-    // new: edit like StudentController
     public function edit()
     {
         $id = (int)($_GET['id'] ?? 0);
@@ -72,22 +69,18 @@ class IncidentController
         exit;
     }
 
-    // new: export incidents as PDF
     public function exportPdf()
     {
         $incidents = $this->model->all();
-        // render HTML for PDF
         ob_start();
         include __DIR__ . '/../../templates/incident/pdf.php';
         $html = ob_get_clean();
 
-        // use Dompdf (composer package)
         $dompdf = new \Dompdf\Dompdf();
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        // stream as download
         $filename = 'incidents_' . date('Ymd_His') . '.pdf';
         $dompdf->stream($filename, ['Attachment' => 1]);
         exit;
