@@ -27,6 +27,20 @@ class Incident
         return $stmt->fetch() ?: null;
     }
 
+    public function findWithRelations(int $id): ?array
+    {
+        $sql = "SELECT i.*, s.StudentID, s.FirstName, s.LastName, s.EnrollmentNo,
+                       rep.StaffID AS ReporterID, rep.Name AS ReporterName
+                FROM IncidentReport i
+                JOIN Student s ON s.StudentID = i.StudentID
+                LEFT JOIN Staff rep ON rep.StaffID = i.ReporterStaffID
+                WHERE i.IncidentID = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
     public function create(array $data): int
     {
         $stmt = $this->db->prepare("INSERT INTO IncidentReport (ReportDate, Location, ReporterStaffID, StudentID, Description, Status) VALUES (:rd, :loc, :rep, :sid, :desc, :status)");

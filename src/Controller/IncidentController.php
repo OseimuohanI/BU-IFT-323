@@ -3,6 +3,10 @@ namespace Controller;
 
 use Model\Incident;
 use Model\Student;
+use Model\OffenseType;
+use Model\ReportOffense;
+use Model\DisciplinaryAction;
+use Model\Staff;
 
 class IncidentController
 {
@@ -86,7 +90,6 @@ class IncidentController
         exit;
     }
 
-    // new: change status (expects POST)
     public function changeStatus()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -104,6 +107,78 @@ class IncidentController
 
         $this->model->updateStatus($id, $status);
         header('Location: ' . BASE_URL . '/?controller=incident&action=index');
+        exit;
+    }
+
+    public function view()
+    {
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id <= 0) {
+            header('Location: ' . BASE_URL . '/?controller=incident&action=index');
+            exit;
+        }
+
+        $incident = $this->model->findWithRelations($id);
+        if (!$incident) {
+            header('Location: ' . BASE_URL . '/?controller=incident&action=index');
+            exit;
+        }
+
+        $offModel = new ReportOffense();
+        $actionModel = new DisciplinaryAction();
+        $offenseTypes = (new OffenseType())->all();
+        $staff = (new Staff())->all();
+
+        $offenses = $offModel->listByIncident($id);
+        $actions = $actionModel->listByIncident($id);
+
+        ob_start();
+        include __DIR__ . '/../../templates/incident/view.php';
+        $content = ob_get_clean();
+        include __DIR__ . '/../../templates/layout.php';
+    }
+
+    public function addOffense()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/?controller=incident&action=index');
+            exit;
+        }
+        $incidentId = (int)($_POST['IncidentID'] ?? 0);
+        $offenseTypeId = (int)($_POST['OffenseTypeID'] ?? 0);
+        $notes = trim($_POST['Notes'] ?? '');
+
+        if ($incidentId > 0 && $offenseTypeId > 0) {
+            $ro = new ReportOffense();
+            $ro->create($incidentId, $offenseTypeId, $notes);
+        }
+
+        header('Location: ' . BASE_URL . '/?controller=incident&action=view&id=' . $incidentId);
+        exit;
+    }
+
+    public function addAction()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/?controller=incident&action=index');
+            exit;
+        }
+        $incidentId = (int)($_POST['IncidentID'] ?? 0);
+        if ($incidentId <= 0) {
+            header('Location: ' . BASE_URL . '/?controller=incident&action=index');
+            exit;
+        }
+        $data = [
+            'ActionType' => trim($_POST['ActionType'] ?? 'Note'),
+            'ActionDate' => $_POST['ActionDate'] ?? date('Y-m-d'),
+            'DurationDays' => (int)($_POST['DurationDays'] ?? 0),
+            'DecisionMakerID' => $_POST['DecisionMakerID'] ?: null,
+            'Notes' => trim($_POST['Notes'] ?? '')
+        ];
+        $da = new DisciplinaryAction();
+        $da->create($incidentId, $data);
+
+        header('Location: ' . BASE_URL . '/?controller=incident&action=view&id=' . $incidentId);
         exit;
     }
 }

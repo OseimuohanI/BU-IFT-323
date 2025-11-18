@@ -18,6 +18,8 @@ use Service\Auth;
         <nav class="site-nav">
             <a class="nav-link" href="<?= BASE_URL ?>/?controller=student&action=index">Students</a>
             <a class="nav-link" href="<?= BASE_URL ?>/?controller=incident&action=index">Incidents</a>
+            <a class="nav-link" href="<?= BASE_URL ?>/?controller=report&action=activeCases">Reports</a>
+
             <?php if (Auth::check()): ?>
                 <span class="user">Logged in as <?= htmlspecialchars(Auth::user()['FullName'] ?? Auth::user()['Username']) ?></span>
                 <a class="nav-link" href="<?= BASE_URL ?>/?controller=auth&action=logout">Logout</a>
